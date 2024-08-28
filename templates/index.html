@@ -1,0 +1,28 @@
+{% extends 'base.html' %} {% block head %}{% endblock %}
+<title>Task Smash</title>
+{% block body %}
+<div class="content">
+  <h1>Tasks</h1>
+  {% if tasks | length < 1 %}
+  <h3>There are no tasks...</h3>
+  {%else%}
+  <table>
+    <tr>
+      <th>Task</th>
+      <th>Added</th>
+      <th>Actions</th>
+    </tr>
+    {% for task in tasks%}
+    <tr>
+      <td>{{task.content}}</td>
+      <td>{{task.created.strftime("%T-%m-%d")}}</td>
+      <td>More</td>
+    </tr>
+  </table>
+  <form action="">
+    <input type="text" name="content" id="content" />
+    <input type="submit" value="Add Task" id="btn_add" />
+  </form>
+</div>
+
+{% endblock %}

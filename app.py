@@ -9,6 +9,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///TaskDB.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
 db = SQLAlchemy(app)
 
 #Data class
@@ -20,6 +21,9 @@ class MyTask(db.Model):
 
     def __repr__(self) -> str:
         return f"Task {self.id}"
+    
+with app.app_context():
+    db.create_all()
 
 #Home page
 @app.route("/", methods=["POST", "GET"])
@@ -41,9 +45,33 @@ def index():
         return render_template("index.html", tasks=tasks)
 
 
+#Delete an Item
+@app.route("/delete/<int:id>")
+def delete(id:int):
+    delete_task = MyTask.query.get_or_404(id)
+    try:
+        db.session.delete(delete_task)
+        db.session.commit()
+        return redirect("/")
+    except Exception as e:
+        return f"ERROR:{e}"
 
-if __name__ in "__main__":
-    with app.app_context():
-        db.create_all()
+#Edit an Item
+@app.route("/edit/<int:id>",methods = ["GET", "POST"])
+def edit(id:int):
+    task = MyTask.query.get_or_404(id)
+    if request.method == "POST":
+        task.content = request.form['content']
+        try:
+            db.session.commit()
+            return redirect("/")
+        except Exception as e:
+            return f"ERROR:{e}"
+    else:
+        return render_template('edit.html', task = task)
+
+
+if __name__ == "__main__":
+
 
     app.run(debug=True)
